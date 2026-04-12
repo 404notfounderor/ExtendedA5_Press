@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Newsletter</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+<div class="container">
+
+<h1 class="title">AI Newsletter</h1>
+
+<!-- 🔐 LOGIN CARD -->
+<div id="loginSection" class="card login-card">
+
+  <input id="username" placeholder="Username">
+  <input id="password" type="password" placeholder="Password">
+
+  <button id="loginBtn" class="primary-btn">Login</button>
+
+  <div class="divider">or</div>
+
+  <!-- 🌐 GOOGLE -->
+  <div id="g_id_onload"
+    data-client_id="YOUR_GOOGLE_CLIENT_ID"
+    data-callback="handleGoogleLogin">
+  </div>
+
+  <div class="g_id_signin small-google"></div>
+
+</div>
+
+<div class="top-actions">
+  <button id="logoutBtn" class="hidden ghost-btn">Logout</button>
+  <button id="generateBtn" class="primary-btn" disabled>Generate</button>
+</div>
+
+<div id="loader" class="loader hidden"></div>
+
+<div id="dashboard" class="card hidden">
+  <p id="userInfo"></p>
+</div>
+
+<h2>Articles</h2>
+<div id="articles"></div>
+
+<h2>Saved Articles</h2>
+<div id="bookmarks"></div>
+
+<h2>History</h2>
+<div id="history"></div>
+
+<h2>Leaderboard</h2>
+<div id="leaderboard"></div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
