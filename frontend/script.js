@@ -1,5 +1,17 @@
 let token = localStorage.getItem("token");
 
+// 🔥 ADD THIS (IMPORTANT)
+const API_URL = "https://your-backend.onrender.com";
+
+const urlParams = new URLSearchParams(window.location.search);
+const urlToken = urlParams.get("token");
+
+if (urlToken) {
+  token = urlToken;
+  localStorage.setItem("token", token);
+  window.history.replaceState({}, document.title, "/");
+}
+
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("overlay");
 
@@ -39,37 +51,18 @@ overlay.onclick = () => {
   overlay.classList.add("hidden");
 };
 
-// LOGIN
-function handleGoogleLogin(response) {
-  const payload = JSON.parse(atob(response.credential.split(".")[1]));
+// 🔥 GOOGLE LOGIN (UPDATED)
+document.getElementById("googleLoginBtn").onclick = () => {
+  window.location.href = `${API_URL}/auth/google`;
+};
 
-  fetch("http://127.0.0.1:8000/login", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      user_id: payload.email,
-      password: "google_oauth"
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    token = data.access_token;
-    localStorage.setItem("token", token);
-
-    showPage("app");
-
-    userProfile.classList.remove("hidden");
-    userName.innerText = payload.name;
-    userEmail.innerText = payload.email;
-    userPic.src = payload.picture;
-
-    loadHistory();
-  });
-}
+document.getElementById("googleLoginSidebar").onclick = () => {
+  window.location.href = `${API_URL}/auth/google`;
+};
 
 // GENERATE
 document.getElementById("generateBtn").onclick = async () => {
-  const res = await fetch("http://127.0.0.1:8000/generate", {
+  const res = await fetch(`${API_URL}/generate`, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({ token })
@@ -101,7 +94,7 @@ document.getElementById("generateBtn").onclick = async () => {
 
 // HISTORY THREADS
 async function loadHistory() {
-  const res = await fetch("http://127.0.0.1:8000/history", {
+  const res = await fetch(`${API_URL}/history`, {
     headers: { Authorization: token }
   });
 

@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rishik RageWire</title>
+  <title>Rishik's RageWire</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -12,7 +11,7 @@
 <!-- NAVBAR -->
 <div class="navbar">
   <button id="menuBtn">☰</button>
-  <div class="logo">Rishik RageWire</div>
+  <div class="logo">Rishik's RageWire</div>
 
   <div id="userProfile" class="profile hidden">
     <img id="userPic" class="avatar">
@@ -29,11 +28,9 @@
   <button onclick="showPage('history')">🕘 History</button>
 
   <div id="loginSidebar">
-    <div id="g_id_onload"
-      data-client_id="YOUR_GOOGLE_CLIENT_ID"
-      data-callback="handleGoogleLogin">
+    <div id="googleLoginSidebar" class="small-google">
+      🔐 Sign in with Google
     </div>
-    <div class="g_id_signin small-google"></div>
   </div>
 
   <div id="historySidebar" class="hidden">
@@ -50,9 +47,11 @@
   <!-- HOME -->
   <div id="page-home" class="page">
     <div class="landing">
-      <h1>Rishik RageWire</h1>
+      <h1>Rishik's RageWire</h1>
       <p>Login to begin</p>
-      <div class="g_id_signin google-btn"></div>
+      <div id="googleLoginBtn" class="google-btn">
+        🔐 Sign in with Google
+      </div>
     </div>
   </div>
 
