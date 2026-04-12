@@ -1,3 +1,8 @@
 requests
 python-dotenv
 groq
+fastapi
+uvicorn
+python-dotenv
+groq
+requests
