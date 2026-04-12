@@ -1,54 +1,45 @@
 let token = localStorage.getItem("token");
-let refreshToken = localStorage.getItem("refresh_token");
 
-const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const generateBtn = document.getElementById("generateBtn");
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
 
-const username = document.getElementById("username");
-const password = document.getElementById("password");
-
-const loader = document.getElementById("loader");
 const articlesDiv = document.getElementById("articles");
-const leaderboardDiv = document.getElementById("leaderboard");
-const historyDiv = document.getElementById("history");
-const bookmarksDiv = document.getElementById("bookmarks");
+const historyThreads = document.getElementById("historyThreads");
+const historyContent = document.getElementById("historyContent");
 
-// AUTO LOGIN
-if (token) {
-  document.getElementById("loginSection").style.display = "none";
-  logoutBtn.classList.remove("hidden");
-  generateBtn.disabled = false;
-}
+const userProfile = document.getElementById("userProfile");
+const userName = document.getElementById("userName");
+const userEmail = document.getElementById("userEmail");
+const userPic = document.getElementById("userPic");
 
-// LOGIN
-loginBtn.onclick = async () => {
-  const res = await fetch("http://127.0.0.1:8000/login", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      user_id: username.value.trim(),
-      password: password.value.trim()
-    })
-  });
-
-  const data = await res.json();
-
-  if (!data.access_token) {
-    alert("Login failed");
-    return;
-  }
-
-  token = data.access_token;
-  refreshToken = data.refresh_token;
-
-  localStorage.setItem("token", token);
-  localStorage.setItem("refresh_token", refreshToken);
-
-  location.reload();
+// ROUTING
+const pages = {
+  home: document.getElementById("page-home"),
+  app: document.getElementById("page-app"),
+  history: document.getElementById("page-history")
 };
 
-// GOOGLE LOGIN
+function showPage(p) {
+  Object.values(pages).forEach(pg => pg.classList.add("hidden"));
+  pages[p].classList.remove("hidden");
+}
+
+// INITIAL
+if (token) showPage("app");
+else showPage("home");
+
+// SIDEBAR
+document.getElementById("menuBtn").onclick = () => {
+  sidebar.classList.add("open");
+  overlay.classList.remove("hidden");
+};
+
+overlay.onclick = () => {
+  sidebar.classList.remove("open");
+  overlay.classList.add("hidden");
+};
+
+// LOGIN
 function handleGoogleLogin(response) {
   const payload = JSON.parse(atob(response.credential.split(".")[1]));
 
@@ -62,67 +53,53 @@ function handleGoogleLogin(response) {
   })
   .then(res => res.json())
   .then(data => {
-    localStorage.setItem("token", data.access_token);
-    localStorage.setItem("refresh_token", data.refresh_token);
-    location.reload();
+    token = data.access_token;
+    localStorage.setItem("token", token);
+
+    showPage("app");
+
+    userProfile.classList.remove("hidden");
+    userName.innerText = payload.name;
+    userEmail.innerText = payload.email;
+    userPic.src = payload.picture;
+
+    loadHistory();
   });
 }
 
-// LOGOUT
-logoutBtn.onclick = () => {
-  localStorage.clear();
-  location.reload();
-};
-
-// RENDER
-function render(data) {
-  articlesDiv.innerHTML = "";
-  leaderboardDiv.innerHTML = "";
-
-  data.articles.forEach((a, i) => {
-    articlesDiv.innerHTML += `
-      <div class="card">
-        <div>Rank ${i+1}</div>
-        <div>${a.content}</div>
-        <button onclick="bookmark('${a.content.replace(/'/g, "\\'")}')">⭐</button>
-      </div>
-    `;
-  });
-
-  data.leaderboard.forEach((u, i) => {
-    leaderboardDiv.innerHTML += `
-      <div>${i+1}. ${u[0]} - ${u[1]}</div>
-    `;
-  });
-}
-
-// BOOKMARK
-async function bookmark(content) {
-  await fetch("http://127.0.0.1:8000/bookmark", {
+// GENERATE
+document.getElementById("generateBtn").onclick = async () => {
+  const res = await fetch("http://127.0.0.1:8000/generate", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ token, content })
-  });
-
-  loadBookmarks();
-}
-
-// LOAD BOOKMARKS
-async function loadBookmarks() {
-  const res = await fetch("http://127.0.0.1:8000/bookmarks", {
-    headers: { Authorization: token }
+    body: JSON.stringify({ token })
   });
 
   const data = await res.json();
 
-  bookmarksDiv.innerHTML = "";
+  articlesDiv.innerHTML = "";
 
-  data.bookmarks.forEach(b => {
-    bookmarksDiv.innerHTML += `<div class="card">${b.content}</div>`;
+  data.articles.forEach(a => {
+    const preview = a.content.slice(0, 120);
+
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `<b>Article</b><br>${preview}...`;
+
+    div.onclick = () => {
+      div.classList.toggle("expanded");
+      div.innerHTML = div.classList.contains("expanded")
+        ? a.content
+        : `<b>Article</b><br>${preview}...`;
+    };
+
+    articlesDiv.appendChild(div);
   });
-}
 
-// LOAD HISTORY
+  loadHistory();
+};
+
+// HISTORY THREADS
 async function loadHistory() {
   const res = await fetch("http://127.0.0.1:8000/history", {
     headers: { Authorization: token }
@@ -130,49 +107,20 @@ async function loadHistory() {
 
   const data = await res.json();
 
-  historyDiv.innerHTML = "";
+  historyThreads.innerHTML = "";
+  historyContent.innerHTML = "";
 
-  data.history.forEach(h => {
-    historyDiv.innerHTML += `<div class="card">${h[0]}</div>`;
+  data.history.forEach((h, i) => {
+    const title = h.content.slice(0, 30) + "...";
+
+    const btn = document.createElement("div");
+    btn.className = "card";
+    btn.innerText = title;
+
+    btn.onclick = () => {
+      historyContent.innerHTML = `<div class="card">${h.content}</div>`;
+    };
+
+    historyThreads.appendChild(btn);
   });
 }
-
-// GENERATE
-generateBtn.onclick = async () => {
-  loader.classList.remove("hidden");
-
-  let res = await fetch("http://127.0.0.1:8000/generate", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ token })
-  });
-
-  let data = await res.json();
-
-  if (data.error) {
-    await fetch("http://127.0.0.1:8000/refresh", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ refresh_token: refreshToken })
-    })
-    .then(res => res.json())
-    .then(d => {
-      token = d.access_token;
-      localStorage.setItem("token", token);
-    });
-
-    res = await fetch("http://127.0.0.1:8000/generate", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ token })
-    });
-
-    data = await res.json();
-  }
-
-  render(data);
-  await loadBookmarks();
-  await loadHistory();
-
-  loader.classList.add("hidden");
-};

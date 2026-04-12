@@ -1,58 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>AI Newsletter</title>
+  <meta charset="UTF-8">
+  <title>Rishik RageWire</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
-<div class="container">
 
-<h1 class="title">AI Newsletter</h1>
+<!-- NAVBAR -->
+<div class="navbar">
+  <button id="menuBtn">☰</button>
+  <div class="logo">Rishik RageWire</div>
 
-<!-- 🔐 LOGIN CARD -->
-<div id="loginSection" class="card login-card">
+  <div id="userProfile" class="profile hidden">
+    <img id="userPic" class="avatar">
+    <div>
+      <div id="userName"></div>
+      <div id="userEmail" class="email"></div>
+    </div>
+  </div>
+</div>
 
-  <input id="username" placeholder="Username">
-  <input id="password" type="password" placeholder="Password">
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+  <button onclick="showPage('app')">🏠 Home</button>
+  <button onclick="showPage('history')">🕘 History</button>
 
-  <button id="loginBtn" class="primary-btn">Login</button>
-
-  <div class="divider">or</div>
-
-  <!-- 🌐 GOOGLE -->
-  <div id="g_id_onload"
-    data-client_id="YOUR_GOOGLE_CLIENT_ID"
-    data-callback="handleGoogleLogin">
+  <div id="loginSidebar">
+    <div id="g_id_onload"
+      data-client_id="YOUR_GOOGLE_CLIENT_ID"
+      data-callback="handleGoogleLogin">
+    </div>
+    <div class="g_id_signin small-google"></div>
   </div>
 
-  <div class="g_id_signin small-google"></div>
-
+  <div id="historySidebar" class="hidden">
+    <h4>History</h4>
+    <div id="historyList"></div>
+  </div>
 </div>
 
-<div class="top-actions">
-  <button id="logoutBtn" class="hidden ghost-btn">Logout</button>
-  <button id="generateBtn" class="primary-btn" disabled>Generate</button>
-</div>
+<div id="overlay" class="overlay hidden"></div>
 
-<div id="loader" class="loader hidden"></div>
+<!-- MAIN -->
+<div id="main">
 
-<div id="dashboard" class="card hidden">
-  <p id="userInfo"></p>
-</div>
+  <!-- HOME -->
+  <div id="page-home" class="page">
+    <div class="landing">
+      <h1>Rishik RageWire</h1>
+      <p>Login to begin</p>
+      <div class="g_id_signin google-btn"></div>
+    </div>
+  </div>
 
-<h2>Articles</h2>
-<div id="articles"></div>
+  <!-- APP -->
+  <div id="page-app" class="page hidden">
+    <button id="generateBtn" class="generate-btn">Generate News</button>
+    <div id="articles"></div>
+  </div>
 
-<h2>Saved Articles</h2>
-<div id="bookmarks"></div>
-
-<h2>History</h2>
-<div id="history"></div>
-
-<h2>Leaderboard</h2>
-<div id="leaderboard"></div>
+  <!-- HISTORY -->
+  <div id="page-history" class="page hidden">
+    <h2>History</h2>
+    <div id="historyThreads"></div>
+    <div id="historyContent"></div>
+  </div>
 
 </div>
 
