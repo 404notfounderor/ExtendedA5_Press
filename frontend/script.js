@@ -1,3 +1,6 @@
+// =====================
+// GLOBAL STATE
+// =====================
 let token = localStorage.getItem("token");
 
 const menuBtn = document.getElementById("menuBtn");
@@ -17,72 +20,96 @@ const userName = document.getElementById("userName");
 const userEmail = document.getElementById("userEmail");
 const userPic = document.getElementById("userPic");
 
+// 🔗 BACKEND
 const API = "https://ragewire-backend.onrender.com";
 
 
-// ✅ INITIAL STATE
-if (token) {
-  landing.classList.add("hidden");
-  content.classList.remove("hidden");
-  loadHistory();
-}
+// =====================
+// INITIAL LOAD FIX
+// =====================
+window.onload = () => {
+  // force sidebar closed
+  sidebar.classList.remove("open");
+  overlay.classList.add("hidden");
+
+  if (token) {
+    landing.classList.add("hidden");
+    content.classList.remove("hidden");
+    loadHistory();
+  }
+};
 
 
-// ☰ OPEN SIDEBAR
+// =====================
+// SIDEBAR CONTROLS
+// =====================
 menuBtn.onclick = () => {
   sidebar.classList.add("open");
   overlay.classList.remove("hidden");
 };
 
-// ❌ CLOSE SIDEBAR
 overlay.onclick = () => {
   sidebar.classList.remove("open");
   overlay.classList.add("hidden");
 };
 
 
-// 🌐 GOOGLE LOGIN
+// =====================
+// GOOGLE LOGIN
+// =====================
 function handleGoogleLogin(response) {
-  const payload = JSON.parse(atob(response.credential.split(".")[1]));
+  try {
+    const payload = JSON.parse(atob(response.credential.split(".")[1]));
 
-  fetch(`${API}/login`, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      user_id: payload.email,
-      password: "google_oauth"
+    fetch(`${API}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: payload.email,
+        password: "google_oauth"
+      })
     })
-  })
-  .then(res => res.json())
-  .then(data => {
-    token = data.access_token;
-    localStorage.setItem("token", token);
+    .then(res => res.json())
+    .then(data => {
+      if (!data.access_token) {
+        throw new Error("Login failed");
+      }
 
-    // UI SWITCH
-    landing.classList.add("hidden");
-    content.classList.remove("hidden");
+      token = data.access_token;
+      localStorage.setItem("token", token);
 
-    // PROFILE
-    userProfile.classList.remove("hidden");
-    userName.innerText = payload.name;
-    userEmail.innerText = payload.email;
-    userPic.src = payload.picture;
+      // UI switch
+      landing.classList.add("hidden");
+      content.classList.remove("hidden");
 
-    loadHistory();
-  })
-  .catch(err => {
-    console.error("Login error:", err);
+      // profile UI
+      userProfile.classList.remove("hidden");
+      userName.innerText = payload.name;
+      userEmail.innerText = payload.email;
+      userPic.src = payload.picture;
+
+      loadHistory();
+    });
+
+  } catch (err) {
+    console.error("Google login error:", err);
     alert("Login failed");
-  });
+  }
 }
 
 
-// 📚 HISTORY
+// =====================
+// LOAD HISTORY
+// =====================
 async function loadHistory() {
+  if (!token) return;
+
   try {
     const res = await fetch(`${API}/history`, {
       headers: { Authorization: token }
     });
+
+    if (!res.ok) throw new Error("History fetch failed");
 
     const data = await res.json();
 
@@ -102,19 +129,28 @@ async function loadHistory() {
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("History error:", err);
   }
 }
 
 
-// 🚀 GENERATE
+// =====================
+// GENERATE ARTICLES
+// =====================
 document.getElementById("generateBtn").onclick = async () => {
+  if (!token) {
+    alert("Please login first");
+    return;
+  }
+
   try {
     const res = await fetch(`${API}/generate`, {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token })
     });
+
+    if (!res.ok) throw new Error("Generate failed");
 
     const data = await res.json();
 
@@ -144,6 +180,7 @@ document.getElementById("generateBtn").onclick = async () => {
     loadHistory();
 
   } catch (err) {
-    console.error(err);
+    console.error("Generate error:", err);
+    alert("Generate failed — check backend");
   }
 };
