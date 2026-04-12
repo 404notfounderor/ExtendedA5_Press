@@ -30,11 +30,11 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-/* SIDEBAR */
+/* SIDEBAR (FIXED) */
 .sidebar {
   position: fixed;
   top: 0;
-  left: -260px;
+  left: -260px;   /* 👈 hidden properly */
   width: 260px;
   height: 100%;
   background: #111;
@@ -87,6 +87,12 @@ body {
   margin-bottom: 20px;
 }
 
+/* CENTER FIX */
+.center {
+  display: flex;
+  justify-content: center;
+}
+
 /* CONTENT */
 .content {
   max-width: 700px;
@@ -109,31 +115,12 @@ body {
   padding: 15px;
   border-radius: 12px;
   margin-top: 10px;
-  transition: 0.2s;
 }
 
-.card:hover {
-  transform: translateY(-2px);
-}
-
-/* HISTORY */
 .history-item {
   cursor: pointer;
   font-size: 14px;
   color: #ccc;
-}
-
-/* ARTICLE */
-.article h3 {
-  margin: 0 0 10px;
-}
-
-.expand-btn {
-  margin-top: 10px;
-  background: none;
-  border: none;
-  color: #ffaa00;
-  cursor: pointer;
 }
 
 /* PROFILE */

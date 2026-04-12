@@ -17,8 +17,6 @@ const userName = document.getElementById("userName");
 const userEmail = document.getElementById("userEmail");
 const userPic = document.getElementById("userPic");
 
-
-// ✅ BACKEND URL (CHANGE THIS AFTER DEPLOY)
 const API = "https://ragewire-backend.onrender.com";
 
 
@@ -49,7 +47,7 @@ function handleGoogleLogin(response) {
 
   fetch(`${API}/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
       user_id: payload.email,
       password: "google_oauth"
@@ -64,7 +62,7 @@ function handleGoogleLogin(response) {
     landing.classList.add("hidden");
     content.classList.remove("hidden");
 
-    // PROFILE UI
+    // PROFILE
     userProfile.classList.remove("hidden");
     userName.innerText = payload.name;
     userEmail.innerText = payload.email;
@@ -91,12 +89,10 @@ async function loadHistory() {
     historySidebar.classList.remove("hidden");
     historyList.innerHTML = "";
 
-    data.history.forEach((h, i) => {
-      const title = h.content.slice(0, 40) + "...";
-
+    data.history.forEach(h => {
       const item = document.createElement("div");
       item.className = "card history-item";
-      item.innerText = title;
+      item.innerText = h.content.slice(0, 40) + "...";
 
       item.onclick = () => {
         articlesDiv.innerHTML = `<div class="card">${h.content}</div>`;
@@ -106,7 +102,7 @@ async function loadHistory() {
     });
 
   } catch (err) {
-    console.error("History error:", err);
+    console.error(err);
   }
 }
 
@@ -116,7 +112,7 @@ document.getElementById("generateBtn").onclick = async () => {
   try {
     const res = await fetch(`${API}/generate`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ token })
     });
 
@@ -148,6 +144,6 @@ document.getElementById("generateBtn").onclick = async () => {
     loadHistory();
 
   } catch (err) {
-    console.error("Generate error:", err);
+    console.error(err);
   }
 };
