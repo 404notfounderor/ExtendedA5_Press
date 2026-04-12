@@ -1,10 +1,5 @@
-// 🌐 BACKEND URL (LIVE)
-const API = "https://ragewire-backend.onrender.com";
-
-// 🔐 TOKEN
 let token = localStorage.getItem("token");
 
-// 📦 ELEMENTS
 const menuBtn = document.getElementById("menuBtn");
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("overlay");
@@ -23,11 +18,14 @@ const userEmail = document.getElementById("userEmail");
 const userPic = document.getElementById("userPic");
 
 
-// 🚀 INITIAL STATE
+// ✅ BACKEND URL (CHANGE THIS AFTER DEPLOY)
+const API = "https://ragewire-backend.onrender.com";
+
+
+// ✅ INITIAL STATE
 if (token) {
   landing.classList.add("hidden");
   content.classList.remove("hidden");
-  historySidebar.classList.remove("hidden");
   loadHistory();
 }
 
@@ -51,7 +49,7 @@ function handleGoogleLogin(response) {
 
   fetch(`${API}/login`, {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       user_id: payload.email,
       password: "google_oauth"
@@ -62,12 +60,11 @@ function handleGoogleLogin(response) {
     token = data.access_token;
     localStorage.setItem("token", token);
 
-    // UI switch
+    // UI SWITCH
     landing.classList.add("hidden");
     content.classList.remove("hidden");
-    historySidebar.classList.remove("hidden");
 
-    // Profile UI
+    // PROFILE UI
     userProfile.classList.remove("hidden");
     userName.innerText = payload.name;
     userEmail.innerText = payload.email;
@@ -77,11 +74,12 @@ function handleGoogleLogin(response) {
   })
   .catch(err => {
     console.error("Login error:", err);
+    alert("Login failed");
   });
 }
 
 
-// 📚 LOAD HISTORY (ChatGPT style)
+// 📚 HISTORY
 async function loadHistory() {
   try {
     const res = await fetch(`${API}/history`, {
@@ -90,21 +88,21 @@ async function loadHistory() {
 
     const data = await res.json();
 
+    historySidebar.classList.remove("hidden");
     historyList.innerHTML = "";
 
-    data.history.reverse().forEach((h, i) => {
-      const title = h.content.slice(0, 50) + "...";
+    data.history.forEach((h, i) => {
+      const title = h.content.slice(0, 40) + "...";
 
-      const div = document.createElement("div");
-      div.className = "history-item";
-      div.innerText = title;
+      const item = document.createElement("div");
+      item.className = "card history-item";
+      item.innerText = title;
 
-      // 👉 click to load full article
-      div.onclick = () => {
-        articlesDiv.innerHTML = renderArticle(h.content);
+      item.onclick = () => {
+        articlesDiv.innerHTML = `<div class="card">${h.content}</div>`;
       };
 
-      historyList.appendChild(div);
+      historyList.appendChild(item);
     });
 
   } catch (err) {
@@ -113,14 +111,12 @@ async function loadHistory() {
 }
 
 
-// 🚀 GENERATE ARTICLES
+// 🚀 GENERATE
 document.getElementById("generateBtn").onclick = async () => {
   try {
-    articlesDiv.innerHTML = `<div class="card">Generating articles...</div>`;
-
     const res = await fetch(`${API}/generate`, {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token })
     });
 
@@ -128,27 +124,22 @@ document.getElementById("generateBtn").onclick = async () => {
 
     articlesDiv.innerHTML = "";
 
-    data.articles.forEach((a, index) => {
-      const preview = a.content.slice(0, 200) + "...";
-
+    data.articles.forEach(a => {
       const card = document.createElement("div");
-      card.className = "card fade-in";
+      card.className = "card article";
 
       card.innerHTML = `
-        <h3>Article ${index + 1}</h3>
-        <p class="preview">${preview}</p>
-        <button class="expand-btn">Read More</button>
+        <h3>${a.title || "AI News"}</h3>
+        <p>${a.content.slice(0, 120)}...</p>
+        <button class="expand-btn">Read more</button>
+        <div class="full hidden">${a.content}</div>
       `;
 
       const btn = card.querySelector(".expand-btn");
-      const p = card.querySelector(".preview");
-
-      let expanded = false;
+      const full = card.querySelector(".full");
 
       btn.onclick = () => {
-        expanded = !expanded;
-        p.innerText = expanded ? a.content : preview;
-        btn.innerText = expanded ? "Show Less" : "Read More";
+        full.classList.toggle("hidden");
       };
 
       articlesDiv.appendChild(card);
@@ -160,20 +151,3 @@ document.getElementById("generateBtn").onclick = async () => {
     console.error("Generate error:", err);
   }
 };
-
-
-// 🧠 RENDER SINGLE ARTICLE (from history click)
-function renderArticle(content) {
-  return `
-    <div class="card fade-in">
-      <p>${content}</p>
-    </div>
-  `;
-}
-
-
-// 🔓 LOGOUT (optional future button)
-function logout() {
-  localStorage.removeItem("token");
-  location.reload();
-}

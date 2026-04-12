@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <title>Rishik's RageWire</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- Google Identity -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -24,48 +27,55 @@
 
 <!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
-  <button onclick="showPage('app')">🏠 Home</button>
-  <button onclick="showPage('history')">🕘 History</button>
+  <h3>Menu</h3>
 
+  <!-- GOOGLE CONFIG -->
+  <div id="g_id_onload"
+    data-client_id="443184962124-8oqbu500dal4g04a8ci9as6heuklacvj.apps.googleusercontent.com "
+    data-callback="handleGoogleLogin"
+    data-auto_prompt="false">
+  </div>
+
+  <!-- LOGIN BUTTON -->
   <div id="loginSidebar">
-    <div id="googleLoginSidebar" class="small-google">
-      🔐 Sign in with Google
+    <div class="g_id_signin"
+      data-type="standard"
+      data-shape="pill"
+      data-theme="outline"
+      data-size="large">
     </div>
   </div>
 
+  <!-- HISTORY -->
   <div id="historySidebar" class="hidden">
     <h4>History</h4>
     <div id="historyList"></div>
   </div>
 </div>
 
+<!-- OVERLAY -->
 <div id="overlay" class="overlay hidden"></div>
 
 <!-- MAIN -->
 <div id="main">
 
-  <!-- HOME -->
-  <div id="page-home" class="page">
-    <div class="landing">
-      <h1>Rishik's RageWire</h1>
-      <p>Login to begin</p>
-      <div id="googleLoginBtn" class="google-btn">
-        🔐 Sign in with Google
-      </div>
+  <!-- LANDING -->
+  <div id="landing" class="landing">
+    <h1>Rishik RageWire</h1>
+    <p>Login to begin</p>
+
+    <div class="g_id_signin"
+      data-type="standard"
+      data-shape="pill"
+      data-theme="filled_black"
+      data-size="large">
     </div>
   </div>
 
-  <!-- APP -->
-  <div id="page-app" class="page hidden">
+  <!-- CONTENT -->
+  <div id="content" class="hidden content">
     <button id="generateBtn" class="generate-btn">Generate News</button>
     <div id="articles"></div>
-  </div>
-
-  <!-- HISTORY -->
-  <div id="page-history" class="page hidden">
-    <h2>History</h2>
-    <div id="historyThreads"></div>
-    <div id="historyContent"></div>
   </div>
 
 </div>
