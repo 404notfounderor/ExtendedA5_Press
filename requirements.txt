@@ -1,8 +1,5 @@
-requests
-python-dotenv
-groq
 fastapi
 uvicorn
+requests
 python-dotenv
 groq
-requests
