@@ -77,11 +77,15 @@ window.handleGoogleLogin = function(response) {
       })
     })
     .then(res => {
-      if (!res.ok) throw new Error("Login failed");
-      return res.json();
+      console.log("🔥 STATUS:", res.status);   // ADD THIS
+      return res.text();                       // 👈 IMPORTANT CHANGE
+    })
+    .then(text => {
+      console.log("🔥 RAW RESPONSE:", text);   // ADD THIS
+      return JSON.parse(text);
     })
     .then(data => {
-      if (!data.access_token) throw new Error("No token");
+      console.log("🔥 PARSED:", data); 
 
       token = data.access_token;
       localStorage.setItem("token", token);
