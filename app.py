@@ -45,41 +45,26 @@ async def login(request: Request):
 
         data = await request.json()
         user_id = data.get("user_id")
-        password = data.get("password")
 
-        if not user_id or not password:
-            return {"error": "Missing username or password"}
+        if not user_id:
+            return {"error": "Missing user_id"}
 
-        # Check if user exists
         conn = get_connection()
         cursor = conn.cursor()
 
-        # 🔥 ENSURE TABLE EXISTS (THIS IS THE FIX)
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            user_id TEXT PRIMARY KEY,
-            password TEXT
-        )
-        """)
-        conn.commit()
-
-        cursor.execute("SELECT password FROM users WHERE user_id = ?", (user_id,))
+        # Check if user exists
+        cursor.execute("SELECT user_id FROM users WHERE user_id = ?", (user_id,))
         result = cursor.fetchone()
 
+        # If not exists → create with dummy password
+        if not result:
+            cursor.execute(
+                "INSERT INTO users (user_id, password) VALUES (?, ?)",
+                (user_id, "google_oauth")
+            )
+            conn.commit()
+
         conn.close()
-
-        # Existing user
-        if result:
-            if password == "google_oauth" or verify_user(user_id, password):
-                return {
-                    "access_token": create_access_token({"user_id": user_id}),
-                    "refresh_token": create_refresh_token({"user_id": user_id})
-                }
-            else:
-                return {"error": "Invalid password"}
-
-        # New user → create
-        create_user(user_id, password)
 
         return {
             "access_token": create_access_token({"user_id": user_id}),
@@ -89,7 +74,6 @@ async def login(request: Request):
     except Exception as e:
         print("LOGIN ERROR:", str(e))
         return {"error": "Server error during login"}
-
 
 # 🔁 REFRESH TOKEN
 @app.post("/refresh")

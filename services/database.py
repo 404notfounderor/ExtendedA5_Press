@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_NAME = "newsletter.db"
+DB_NAME = "newsletter_v2.db"
 
 
 def get_connection():
