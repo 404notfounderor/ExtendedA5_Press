@@ -3,7 +3,7 @@ body {
   background: #0b0b0b;
   color: white;
   font-family: -apple-system, sans-serif;
-  overflow-x: hidden;  /* Add this line */
+  overflow-x: hidden;
 }
 
 /* NAVBAR */
@@ -43,7 +43,7 @@ body {
   border-right: 1px solid #222;
   z-index: 1000;
 
-  transform: translateX(-100%);   /* 🔥 FIX */
+  transform: translateX(-100%);
   transition: transform 0.3s ease;
 }
 
@@ -60,8 +60,7 @@ body {
   height: 100%;
   background: rgba(0,0,0,0.5);
   z-index: 999;
-
-  display: none;   /* 🔥 important */
+  display: none;
 }
 
 .overlay.show {
@@ -96,7 +95,7 @@ body {
   margin-bottom: 20px;
 }
 
-/* CENTER FIX */
+/* CENTER */
 .center {
   display: flex;
   justify-content: center;
@@ -140,10 +139,16 @@ body {
   gap: 10px;
 }
 
+.profile div {
+  display: flex;
+  flex-direction: column;
+}
+
 .avatar {
-  width: 35px;
-  height: 35px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
+  object-fit: cover;
 }
 
 .email {

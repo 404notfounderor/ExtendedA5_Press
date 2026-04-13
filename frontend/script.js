@@ -1,6 +1,3 @@
-// =====================
-// GLOBAL STATE
-// =====================
 let token = localStorage.getItem("token");
 
 const menuBtn = document.getElementById("menuBtn");
@@ -20,44 +17,54 @@ const userName = document.getElementById("userName");
 const userEmail = document.getElementById("userEmail");
 const userPic = document.getElementById("userPic");
 
-// 🔗 BACKEND
 const API = "https://ragewire-backend.onrender.com";
 
-
-// =====================
-// INITIAL LOAD FIX
-// =====================
+/* INITIAL LOAD */
 window.onload = () => {
-  // force sidebar closed
   sidebar.classList.remove("open");
-  overlay.classList.add("hidden");
+  overlay.classList.remove("show");
 
   if (token) {
     landing.classList.add("hidden");
     content.classList.remove("hidden");
+
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (user) {
+        userProfile.classList.remove("hidden");
+        userName.innerText = user.name || "User";
+        userEmail.innerText = user.email || "";
+        userPic.src = user.picture || "";
+
+        document.getElementById("loginSidebar").classList.add("hidden");
+      }
+    } catch (e) {
+      console.warn("User parse error");
+    }
+
     loadHistory();
   }
 };
 
-
-// =====================
-// SIDEBAR CONTROLS
-// =====================
+/* SIDEBAR */
 menuBtn.onclick = () => {
   sidebar.classList.add("open");
-  overlay.classList.remove("hidden");
+  overlay.classList.add("show");
 };
 
 overlay.onclick = () => {
   sidebar.classList.remove("open");
-  overlay.classList.add("hidden");
+  overlay.classList.remove("show");
 };
 
+/* IMAGE FALLBACK */
+userPic.onerror = () => {
+  userPic.src = "https://via.placeholder.com/36";
+};
 
-// =====================
-// GOOGLE LOGIN
-// =====================
-function handleGoogleLogin(response) {
+/* GOOGLE LOGIN */
+window.handleGoogleLogin = function(response) {
   try {
     const payload = JSON.parse(atob(response.credential.split(".")[1]));
 
@@ -69,38 +76,49 @@ function handleGoogleLogin(response) {
         password: "google_oauth"
       })
     })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error("Login failed");
+      return res.json();
+    })
     .then(data => {
-      if (!data.access_token) {
-        throw new Error("Login failed");
-      }
+      if (!data.access_token) throw new Error("No token");
 
       token = data.access_token;
       localStorage.setItem("token", token);
 
-      // UI switch
+      localStorage.setItem("user", JSON.stringify({
+        name: payload.name,
+        email: payload.email,
+        picture: payload.picture
+      }));
+
       landing.classList.add("hidden");
       content.classList.remove("hidden");
 
-      // profile UI
       userProfile.classList.remove("hidden");
       userName.innerText = payload.name;
       userEmail.innerText = payload.email;
       userPic.src = payload.picture;
 
+      document.getElementById("loginSidebar").classList.add("hidden");
+
+      sidebar.classList.remove("open");
+      overlay.classList.remove("show");
+
       loadHistory();
+    })
+    .catch(err => {
+      console.error("Login error:", err);
+      alert("Login failed");
     });
 
   } catch (err) {
-    console.error("Google login error:", err);
+    console.error("Google decode error:", err);
     alert("Login failed");
   }
-}
+};
 
-
-// =====================
-// LOAD HISTORY
-// =====================
+/* HISTORY */
 async function loadHistory() {
   if (!token) return;
 
@@ -109,7 +127,7 @@ async function loadHistory() {
       headers: { Authorization: token }
     });
 
-    if (!res.ok) throw new Error("History fetch failed");
+    if (!res.ok) throw new Error("History failed");
 
     const data = await res.json();
 
@@ -133,21 +151,22 @@ async function loadHistory() {
   }
 }
 
-
-// =====================
-// GENERATE ARTICLES
-// =====================
+/* GENERATE */
 document.getElementById("generateBtn").onclick = async () => {
-  if (!token) {
-    alert("Please login first");
-    return;
-  }
+  if (!token) return alert("Login first");
+
+  const btn = document.getElementById("generateBtn");
+  btn.disabled = true;
+  btn.innerText = "Generating...";
 
   try {
     const res = await fetch(`${API}/generate`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token })
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token
+      },
+      body: JSON.stringify({})
     });
 
     if (!res.ok) throw new Error("Generate failed");
@@ -158,11 +177,11 @@ document.getElementById("generateBtn").onclick = async () => {
 
     data.articles.forEach(a => {
       const card = document.createElement("div");
-      card.className = "card article";
+      card.className = "card";
 
       card.innerHTML = `
         <h3>${a.title || "AI News"}</h3>
-        <p>${a.content.slice(0, 120)}...</p>
+        <p>${a.content.slice(0,120)}...</p>
         <button class="expand-btn">Read more</button>
         <div class="full hidden">${a.content}</div>
       `;
@@ -170,9 +189,7 @@ document.getElementById("generateBtn").onclick = async () => {
       const btn = card.querySelector(".expand-btn");
       const full = card.querySelector(".full");
 
-      btn.onclick = () => {
-        full.classList.toggle("hidden");
-      };
+      btn.onclick = () => full.classList.toggle("hidden");
 
       articlesDiv.appendChild(card);
     });
@@ -181,6 +198,9 @@ document.getElementById("generateBtn").onclick = async () => {
 
   } catch (err) {
     console.error("Generate error:", err);
-    alert("Generate failed — check backend");
+    alert("Generate failed");
   }
+
+  btn.disabled = false;
+  btn.innerText = "Generate News";
 };
