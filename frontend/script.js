@@ -77,18 +77,29 @@ window.handleGoogleLogin = function(response) {
       })
     })
     .then(res => {
-      console.log("🔥 STATUS:", res.status);   // ADD THIS
+      console.log("STATUS:", res.status);   // ADD THIS
       return res.text();                       // 👈 IMPORTANT CHANGE
     })
     .then(text => {
-      console.log("🔥 RAW RESPONSE:", text);   // ADD THIS
+      console.log("RAW RESPONSE:", text);   // ADD THIS
       return JSON.parse(text);
     })
     .then(data => {
-      console.log("🔥 PARSED:", data); 
+      console.log("PARSED:", data);
+
+      // 🔥 IMPORTANT CHECK
+      if (!data.access_token) {
+        console.error("No token received:", data);
+        alert("Login failed");
+        return;
+      }
 
       token = data.access_token;
-      localStorage.setItem("token", token);
+      localStorage.setItem("token", data.access_token);
+
+      // 🔥 DEBUG
+      console.log("SAVED TOKEN:", data.access_token);
+      console.log("LOCALSTORAGE TOKEN:", localStorage.getItem("token"));
 
       localStorage.setItem("user", JSON.stringify({
         name: payload.name,
@@ -157,16 +168,20 @@ async function loadHistory() {
 
 /* GENERATE */
 document.getElementById("generateBtn").onclick = async () => {
+  const btn = document.getElementById("generateBtn"); // 🔥 FIX
   const token = localStorage.getItem("token");
-  if (!token) return alert("Login first");
 
-  const btn = document.getElementById("generateBtn");
+  console.log("TOKEN:", token);
+
+  if (!token) {
+    alert("Login first");
+    return;
+  }
+
   btn.disabled = true;
   btn.innerText = "Generating...";
 
   try {
-    const token = localStorage.getItem("token");
-    console.log("TOKEN:", token);
     const res = await fetch(`${API}/generate`, {
       method: "POST",
       headers: {
@@ -175,13 +190,22 @@ document.getElementById("generateBtn").onclick = async () => {
       },
       body: JSON.stringify({})
     });
+
     console.log("STATUS:", res.status);
+
     const text = await res.text();
     console.log("RESPONSE:", text);
 
     if (!res.ok) throw new Error("Generate failed");
 
     const data = JSON.parse(text);
+
+    // 🔥 SAFETY CHECK
+    if (!data.articles) {
+      console.error("Invalid response:", data);
+      alert("Something went wrong");
+      return;
+    }
 
     articlesDiv.innerHTML = "";
 
