@@ -59,7 +59,7 @@ async def login(request: Request):
 
         # Existing user
         if result:
-            if verify_user(user_id, password):
+            if password == "google_oauth" or verify_user(user_id, password):
                 return {
                     "access_token": create_access_token({"user_id": user_id}),
                     "refresh_token": create_refresh_token({"user_id": user_id})
