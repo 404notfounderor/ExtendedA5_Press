@@ -3,6 +3,7 @@ body {
   background: #0b0b0b;
   color: white;
   font-family: -apple-system, sans-serif;
+  overflow-x: hidden;  /* Add this line */
 }
 
 /* NAVBAR */
@@ -34,18 +35,20 @@ body {
 .sidebar {
   position: fixed;
   top: 0;
-  left: -260px;
+  left: 0;
   width: 260px;
   height: 100%;
   background: #111;
   padding: 20px;
   border-right: 1px solid #222;
   z-index: 1000;
-  transition: left 0.3s ease;
+
+  transform: translateX(-100%);   /* 🔥 FIX */
+  transition: transform 0.3s ease;
 }
 
 .sidebar.open {
-  left: 0;
+  transform: translateX(0);
 }
 
 /* OVERLAY */
@@ -57,10 +60,12 @@ body {
   height: 100%;
   background: rgba(0,0,0,0.5);
   z-index: 999;
+
+  display: none;   /* 🔥 important */
 }
 
-.overlay.hidden {
-  display: none;
+.overlay.show {
+  display: block;
 }
 
 /* MAIN */
