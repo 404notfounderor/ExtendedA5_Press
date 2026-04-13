@@ -88,8 +88,8 @@ window.handleGoogleLogin = function(response) {
       console.log("PARSED:", data);
 
       // 🔥 IMPORTANT CHECK
-      if (!data.access_token) {
-        console.error("No token received:", data);
+      if (!data.access_token || data.access_token === "undefined") {
+        console.error("Invalid token from backend:", data);
         alert("Login failed");
         return;
       }
