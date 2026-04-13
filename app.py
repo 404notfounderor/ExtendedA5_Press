@@ -105,8 +105,16 @@ async def generate(request: Request):
     try:
         init_db()
 
-        data = await request.json()
-        token = data.get("token")
+        # 🔥 GET TOKEN FROM HEADER (FIX)
+        auth_header = request.headers.get("Authorization")
+
+        if not auth_header:
+            return {"error": "No token provided"}
+
+        if auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+        else:
+            token = auth_header
 
         user = verify_token(token)
 
@@ -146,12 +154,21 @@ async def generate(request: Request):
         print("GENERATE ERROR:", e)
         return {"error": "Server error during generation"}
 
-
 # 📚 USER HISTORY
 @app.get("/history")
 async def history(request: Request):
     try:
-        token = request.headers.get("Authorization")
+        # 🔥 FIX TOKEN EXTRACTION
+        auth_header = request.headers.get("Authorization")
+
+        if not auth_header:
+            return {"error": "No token provided"}
+
+        if auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+        else:
+            token = auth_header
+
         user = verify_token(token)
 
         if not user:
@@ -173,8 +190,7 @@ async def history(request: Request):
     except Exception as e:
         print("HISTORY ERROR:", e)
         return {"error": "Server error fetching history"}
-
-
+    
 # ⭐ SAVE BOOKMARK
 @app.post("/bookmark")
 async def bookmark(request: Request):
