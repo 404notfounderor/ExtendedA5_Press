@@ -165,19 +165,23 @@ document.getElementById("generateBtn").onclick = async () => {
   btn.innerText = "Generating...";
 
   try {
+    const token = localStorage.getItem("token");
     console.log("TOKEN:", token);
     const res = await fetch(`${API}/generate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": token
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify({})
     });
+    console.log("STATUS:", res.status);
+    const text = await res.text();
+    console.log("RESPONSE:", text);
 
     if (!res.ok) throw new Error("Generate failed");
 
-    const data = await res.json();
+    const data = JSON.parse(text);
 
     articlesDiv.innerHTML = "";
 
