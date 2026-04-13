@@ -157,6 +157,7 @@ async function loadHistory() {
 
 /* GENERATE */
 document.getElementById("generateBtn").onclick = async () => {
+  const token = localStorage.getItem("token");
   if (!token) return alert("Login first");
 
   const btn = document.getElementById("generateBtn");
@@ -164,6 +165,7 @@ document.getElementById("generateBtn").onclick = async () => {
   btn.innerText = "Generating...";
 
   try {
+    console.log("TOKEN:", token);
     const res = await fetch(`${API}/generate`, {
       method: "POST",
       headers: {
