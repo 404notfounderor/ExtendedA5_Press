@@ -100,7 +100,7 @@ async def generate(request: Request):
     try:
         init_db()
 
-        # 🔥 GET TOKEN FROM HEADER (FIX)
+        # 🔥 GET TOKEN FROM HEADER
         auth_header = request.headers.get("Authorization")
 
         if not auth_header:
@@ -111,11 +111,13 @@ async def generate(request: Request):
         else:
             token = auth_header
 
+        # 🔥 VERIFY TOKEN
         user = verify_token(token)
 
         if not user:
             return {"error": "Invalid token"}
 
+        # 🔥 GENERATE ARTICLES
         news = fetch_news("AI")
         articles = []
 
@@ -130,34 +132,38 @@ async def generate(request: Request):
 
         articles.sort(key=lambda x: x.score, reverse=True)
 
+        # 🔥 SAVE + REWARD
         for i, a in enumerate(articles[:5], 1):
             pts = calculate_total_points(a, i)
+
             update_points(user, pts)
             update_level(user)
 
             save_article(user, a.content, a.score)
 
+        # 🔥 RETURN CLEAN RESPONSE
         return {
             "articles": [
-                {"content": a.content}
+                {
+                    "title": a.title,
+                    "content": a.content
+                }
                 for a in articles[:5]
-            ],
-            "leaderboard": get_leaderboard()
+            ]
         }
 
     except Exception as e:
-        print("GENERATE ERROR:", e)
+        print("GENERATE ERROR:", str(e))
         return {"error": "Server error during generation"}
-
+    
 # 📚 USER HISTORY
 @app.get("/history")
 async def history(request: Request):
     try:
-        # 🔥 FIX TOKEN EXTRACTION
         auth_header = request.headers.get("Authorization")
 
         if not auth_header:
-            return {"error": "No token provided"}
+            return {"error": "No token"}
 
         if auth_header.startswith("Bearer "):
             token = auth_header.split(" ")[1]
@@ -183,9 +189,9 @@ async def history(request: Request):
         }
 
     except Exception as e:
-        print("HISTORY ERROR:", e)
-        return {"error": "Server error fetching history"}
-    
+        print("HISTORY ERROR:", str(e))
+        return {"error": "Server error"}
+        
 # ⭐ SAVE BOOKMARK
 @app.post("/bookmark")
 async def bookmark(request: Request):
