@@ -53,8 +53,19 @@ async def login(request: Request):
         # Check if user exists
         conn = get_connection()
         cursor = conn.cursor()
+
+        # 🔥 ENSURE TABLE EXISTS (THIS IS THE FIX)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            user_id TEXT PRIMARY KEY,
+            password TEXT
+        )
+        """)
+        conn.commit()
+
         cursor.execute("SELECT password FROM users WHERE user_id = ?", (user_id,))
         result = cursor.fetchone()
+
         conn.close()
 
         # Existing user
@@ -76,7 +87,7 @@ async def login(request: Request):
         }
 
     except Exception as e:
-        print("LOGIN ERROR:", e)
+        print("LOGIN ERROR:", str(e))
         return {"error": "Server error during login"}
 
 
